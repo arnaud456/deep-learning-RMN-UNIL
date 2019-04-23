@@ -9,6 +9,8 @@ from tensorflow import keras
 import numpy as np
 import matplotlib.pyplot as plt
 
+import random
+
 rows=[]
 id=[]
 with open("colaus1.focus.raw.csv", "r") as csvFile:
@@ -17,7 +19,6 @@ with open("colaus1.focus.raw.csv", "r") as csvFile:
     	r = [float(n) for n in row]
     	rows.append(r[1:])
     	id.append(int(r[0]))
-
 
 csvFile.close()
 ppm = rows[0]
@@ -39,12 +40,11 @@ with open("sex.csv", "r") as csvFile:
     reader2 = csv.reader(csvFile)
     for row in reader2:
     	s.append(row[1])
-    	sex = [int(n) for n in s[1:]]
     	i.append(row[0])
-    	id2 = [int(n) for n in i[1:]]
+    sex = [int(n) for n in s[1:]]
+    id2 = [int(n) for n in i[1:]]
 
 csvFile.close()
-
 
 ######################## Preparation des donnees #########################################
 # diviser les donnees par le max --> entre 0 et 1
@@ -76,14 +76,35 @@ while i < len(rows) :
     s = []
     i += 1
 
-train_spectro = np.array(spectro[0:850])
-train_sex = np.array(sexe[0:850])
+spectro = np.array(spectro)
+sexe = np.array(sexe)
 
-val_spectro = np.array(spectro[851:870])
-val_sex = np.array(sexe[851:870])
+# randomisation des echantillons
+# utiliser la fonction numpy.choice(liste, combien on en veut, replace =F)
 
-test_spectro = np.array(spectro[871:])
-test_sex = np.array(sexe[871:])
+t = random.sample(range(0,len(spectro)), 874) # 90% pour le training set
+
+e = list(range(0,len(spectro)))
+for i in t:
+	for j in t:
+		if j == i:
+			e.remove(j)
+
+v = random.sample(t, 88) # 10% du training set pour la validation set
+
+for i in v:
+	for j in t:
+		if j == i:
+			t.remove(j)
+
+train_spectro = spectro[t]
+train_sex = sexe[t]
+
+val_spectro = spectro[v]
+val_sex = sexe[v]
+
+test_spectro = spectro[e]
+test_sex = sexe[e]
 
 ################## Creation du modele ###################################################
 
@@ -102,21 +123,45 @@ model.compile(optimizer='adam', # Comment le modele est telecharges de la base i
 
 history = model.fit(train_spectro,
                     train_sex,
-                    epochs=40,
-                    batch_size=16,
+                    epochs=60,
+                    batch_size=10,
                     validation_data=(val_spectro, val_sex),
                     verbose = 1)
-
 
 ################## Evaluation du modele #################################################
 print("\n")
 print("Evaluation :")
 results = model.evaluate(test_spectro, test_sex)
 
+history_dict = history.history
+history_dict.keys()
 
+acc = history_dict['acc']
+val_acc = history_dict['val_acc']
+loss = history_dict['loss']
+val_loss = history_dict['val_loss']
+epochs = range(1, len(acc) + 1)
 
+# "bo" is for "blue dot"
+plt.plot(epochs, loss, 'bo', label='Training loss', color ="blue")
+# b is for "solid blue line"
+plt.plot(epochs, val_loss, 'b', label='Validation loss', color ="blue")
+plt.title('Training and validation loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.legend()
 
+plt.show()
 
+plt.clf()   # clear figure
 
+plt.plot(epochs, acc, 'bo', label='Training acc', color ="blue")
+plt.plot(epochs, val_acc, 'b', label='Validation acc', color ="blue")
+plt.title('Training and validation accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.legend()
+
+plt.show()
 
 
