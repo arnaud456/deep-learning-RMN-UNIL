@@ -29,7 +29,7 @@ with open('C:/Users/THEO/Desktop/Biologie-IV/Programmation/data/metab.tsv', 'r')
     i=0
     for row in readerPhen:
        
-        if('' not in row): #pour enlever les cases vides
+        if('' not in row and 'K' not in row): #pour enlever les lignes qui ne nous intéressent pas
             id.append(int(row[0]))
             age.append(float(row[1]))
             sex.append(row[2])
