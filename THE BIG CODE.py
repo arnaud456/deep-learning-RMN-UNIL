@@ -105,3 +105,6 @@ dfEval = dfFinal.iloc[idEval]
 
 ####################Réseau de neurone trop cool#########################
 
+#pour utilser une liste provenant d'un dataFrame il vous suffit d'utiliser list(nomDataFrame['nom de la colonne'])
+#par exemple, si vous voulez une liste contenant les âges du dataFrame Test vous n'avez qu'à faire list(dfTest['age'])
+#Bonne journée
