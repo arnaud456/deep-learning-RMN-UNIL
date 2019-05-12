@@ -92,9 +92,11 @@ import random
 
 idTest = random.sample(range(len(dfFinal)), int(len(dfFinal)*0.9))
 
+#dataFrame pour l'apprentissage du réseau
 dfTest = dfFinal.iloc[idTest]
 print(dfTest)
 
+#dataFrame pour évaluer le réseau
 idEval = []
 for i in range(1, len(dfFinal)):
     if(i not in idTest):
