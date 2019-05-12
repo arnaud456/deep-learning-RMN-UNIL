@@ -86,7 +86,20 @@ dfSpectrum = pandas.DataFrame({'key': idSpectre, 'spectre': rowSpectre})
 
 dfFinal = pandas.merge(dfPhen,dfSpectrum, on ='key')
 
-print(dfFinal)
-
 ####################Randomiser les données#################################
+
+import random
+
+idTest = random.sample(range(len(dfFinal)), int(len(dfFinal)*0.9))
+
+dfTest = dfFinal.iloc[idTest]
+print(dfTest)
+
+idEval = []
+for i in range(1, len(dfFinal)):
+    if(i not in idTest):
+        idEval.append(i)
+dfEval = dfFinal.iloc[idEval]
+
+####################Réseau de neurone trop cool#########################
 
