@@ -105,6 +105,95 @@ dfEval = dfFinal.iloc[idEval]
 
 ####################Réseau de neurone trop cool#########################
 
-#pour utilser une liste provenant d'un dataFrame il vous suffit d'utiliser list(nomDataFrame['nom de la colonne'])
-#par exemple, si vous voulez une liste contenant les âges du dataFrame Test vous n'avez qu'à faire list(dfTest['age'])
-#Bonne journée
+#tableaux pour test
+listSpectreTest = []
+listAgeTest =[]
+listSexTest=[]
+listSpectreTest = list(dfTest['spectre'])
+listAgeTest = list(dfTest['age'])
+listSexTest = list(dfTest['sex'])
+dataTest = []
+i = 0
+while i < len(listSpectreTest) :
+    listSpectreTest[i].append(listAgeTest[i])
+    if listSexTest[i] is 'F':
+        listSpectreTest[i].append(0)
+    else :
+        listSpectreTest[i].append(1)
+    dataTest.append(listSpectreTest[i])
+    i += 1
+print(dataTest[5])
+
+reponseTest = []
+i= 0
+while i < len(dfTest):
+    dbtldNumber = 1
+    if list(dfTest['dbtld'])[i] is 'N':
+        dbtldNumber = 0
+    ligne = [list(dfTest['hdlch'])[i],list(dfTest['bpd'])[i],list(dfTest['bps'])[i],list(dfTest['bdmsix'])[i],list(dfTest['ldlch'])[i],list(dfTest['trig'])[i]]
+    reponseTest.append(ligne)
+    i=i+1
+print(reponseTest[5])
+
+#tableau pour validation
+
+listSpectreEval = []
+listAgeEval =[]
+listSexEval=[]
+listSpectreEval = list(dfEval['spectre'])
+listAgeEval = list(dfEval['age'])
+listSexEval = list(dfEval['sex'])
+dataEval = []
+i = 0
+while i < len(listSpectreEval) :
+    listSpectreEval[i].append(listAgeEval[i])
+    if listSexEval[i] is 'F':
+        listSpectreEval[i].append(0)
+    else :
+        listSpectreEval[i].append(1)
+    dataEval.append(listSpectreEval[i])
+    i += 1
+print(dataEval[5])
+
+reponseEval = []
+i= 0
+while i < len(dfEval):
+    ligne = [list(dfEval['hdlch'])[i],list(dfEval['bpd'])[i],list(dfEval['bps'])[i]]
+    reponseEval.append(ligne)
+    i=i+1
+print(reponseEval[5])
+
+####################Réseau de neurone trop cool#########################
+
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+
+model = keras.Sequential()
+model.add(keras.layers.Dense(80, activation=tf.nn.relu, input_shape=(1644,)))
+model.add(keras.layers.Dense(3, activation=tf.nn.relu))
+
+model.compile(optimizer='adam', 
+              loss='mean_squared_error', 
+              metrics=['mean_squared_error'])
+
+history = model.fit(np.array(dataTest),
+                    np.array(reponseTest),
+                    epochs=60,
+                    batch_size=10,
+                    validation_data=(np.array(dataEval), np.array(reponseEval)),
+                    verbose = 1)
+
+model.summary()
+
+import matplotlib.pyplot as plt
+
+prediction = model.predict(np.array(dataEval))
+plt.plot(np.array(reponseEval)[:,0], prediction[:,0], "b.")
+plt.show()
+plt.plot(np.array(reponseEval)[:,1], prediction[:,1], "b.")
+plt.show()
+plt.plot(np.array(reponseEval)[:,2], prediction[:,2], "b.")
+plt.show()
+print(np.corrcoef(np.array(reponseEval)[:,1], prediction[:,1])[0][1])
+#mettre ça au carré
