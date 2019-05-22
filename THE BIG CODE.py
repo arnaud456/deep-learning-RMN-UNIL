@@ -88,112 +88,106 @@ dfFinal = pandas.merge(dfPhen,dfSpectrum, on ='key')
 
 ####################Randomiser les données#################################
 
+###########fonction pour randomiser################
+
+
 import random
 
 idTest = random.sample(range(len(dfFinal)), int(len(dfFinal)*0.9))
 
-#dataFrame pour l'apprentissage du réseau
-dfTest = dfFinal.iloc[idTest]
-print(dfTest)
-
-#dataFrame pour évaluer le réseau
 idEval = []
 for i in range(1, len(dfFinal)):
     if(i not in idTest):
         idEval.append(i)
+        
+dfTest = dfFinal.iloc[idTest]
 dfEval = dfFinal.iloc[idEval]
 
-####################Réseau de neurone trop cool#########################
+print(dfTest['spectre'].iloc[0])
 
-#tableaux pour test
-listSpectreTest = []
-listAgeTest =[]
-listSexTest=[]
-listSpectreTest = list(dfTest['spectre'])
-listAgeTest = list(dfTest['age'])
-listSexTest = list(dfTest['sex'])
-dataTest = []
-i = 0
-while i < len(listSpectreTest) :
-    listSpectreTest[i].append(listAgeTest[i])
-    if listSexTest[i] is 'F':
-        listSpectreTest[i].append(0)
-    else :
-        listSpectreTest[i].append(1)
-    dataTest.append(listSpectreTest[i])
-    i += 1
-print(dataTest[5])
+def randomData(dataframe) :
+    data = []
+    for i in range(len(dataframe)):
+        listSpectre=[]
+        listSpectre = list(dataframe['spectre'].iloc[i])
+        listSpectre.append(dataframe['age'].iloc[i])
+        if dataframe['sex'].iloc[i] is 'F':
+            listSpectre.append(0)
+        else :
+            listSpectre.append(1)
+        data.append(listSpectre)
+    return data
 
-reponseTest = []
-i= 0
-while i < len(dfTest):
-    dbtldNumber = 1
-    if list(dfTest['dbtld'])[i] is 'N':
-        dbtldNumber = 0
-    ligne = [list(dfTest['hdlch'])[i],list(dfTest['bpd'])[i],list(dfTest['bps'])[i],list(dfTest['bdmsix'])[i],list(dfTest['ldlch'])[i],list(dfTest['trig'])[i]]
-    reponseTest.append(ligne)
-    i=i+1
-print(reponseTest[5])
+def randomReponse(dataframe):
+    reponse = []
+    for i in range(len(dataframe)):
+        dbtldNumber = 1
+        if list(dataframe['dbtld'])[i] is 'N':
+            dbtldNumber = 0
+        ligne = [list(dataframe['hdlch'])[i],list(dataframe['bpd'])[i],list(dataframe['bps'])[i],list(dataframe['bdmsix'])[i],list(dataframe['ldlch'])[i],list(dataframe['trig'])[i], dbtldNumber]
+        reponse.append(ligne)
+    return reponse
 
-#tableau pour validation
+dataTest = randomData(dfTest)
+reponseTest = randomReponse(dfTest)
 
-listSpectreEval = []
-listAgeEval =[]
-listSexEval=[]
-listSpectreEval = list(dfEval['spectre'])
-listAgeEval = list(dfEval['age'])
-listSexEval = list(dfEval['sex'])
-dataEval = []
-i = 0
-while i < len(listSpectreEval) :
-    listSpectreEval[i].append(listAgeEval[i])
-    if listSexEval[i] is 'F':
-        listSpectreEval[i].append(0)
-    else :
-        listSpectreEval[i].append(1)
-    dataEval.append(listSpectreEval[i])
-    i += 1
-print(dataEval[5])
+dataEval = randomData(dfEval)
+reponseEval = randomReponse(dfEval)
 
-reponseEval = []
-i= 0
-while i < len(dfEval):
-    ligne = [list(dfEval['hdlch'])[i],list(dfEval['bpd'])[i],list(dfEval['bps'])[i]]
-    reponseEval.append(ligne)
-    i=i+1
-print(reponseEval[5])
 
 ####################Réseau de neurone trop cool#########################
+
+#####calcul des coefficient de correlation pour chaque phénotype
 
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-model = keras.Sequential()
-model.add(keras.layers.Dense(80, activation=tf.nn.relu, input_shape=(1644,)))
-model.add(keras.layers.Dense(3, activation=tf.nn.relu))
+additionCorrCarre = [0,0,0,0,0,0,0]
 
-model.compile(optimizer='adam', 
-              loss='mean_squared_error', 
-              metrics=['mean_squared_error'])
+for i in range(100):
+    
+    idTest = random.sample(range(len(dfFinal)), int(len(dfFinal)*0.9))
+    
+    idEval = []
+    for i in range(1, len(dfFinal)):
+        if(i not in idTest):
+            idEval.append(i)
+            
+    dfTest = dfFinal.iloc[idTest]
+    dfEval = dfFinal.iloc[idEval]
+    
+    dataTest = randomData(dfTest)
+    reponseTest = randomReponse(dfTest)
+    
+    dataEval = randomData(dfEval)
+    reponseEval = randomReponse(dfEval)
+    
 
-history = model.fit(np.array(dataTest),
-                    np.array(reponseTest),
-                    epochs=60,
-                    batch_size=10,
-                    validation_data=(np.array(dataEval), np.array(reponseEval)),
-                    verbose = 1)
-
-model.summary()
-
-import matplotlib.pyplot as plt
-
-prediction = model.predict(np.array(dataEval))
-plt.plot(np.array(reponseEval)[:,0], prediction[:,0], "b.")
-plt.show()
-plt.plot(np.array(reponseEval)[:,1], prediction[:,1], "b.")
-plt.show()
-plt.plot(np.array(reponseEval)[:,2], prediction[:,2], "b.")
-plt.show()
-print(np.corrcoef(np.array(reponseEval)[:,1], prediction[:,1])[0][1])
-#mettre ça au carré
+    #je calcul corrcarre pour ces valeurs là
+    corrCarre = []
+    for i in range(len(reponseEval[0])):
+        model = keras.Sequential()
+        model.add(keras.layers.Dense(80, activation=tf.nn.relu, input_shape=(1644,)))
+        model.add(keras.layers.Dense(1, activation=tf.nn.relu))
+        
+        model.compile(optimizer='adam', 
+                      loss='mean_squared_error', 
+                      metrics=['mean_squared_error'])
+        
+        model.fit(np.array(dataTest),
+                            np.array(reponseTest)[:,1],
+                            epochs=60)
+        
+        prediction = model.predict(np.array(dataEval))
+        dataPrediction = []
+        for i in prediction:
+            dataPrediction.append(i[0])
+        corrCarre.append((np.corrcoef(np.array(reponseEval)[:,1], np.array(dataPrediction))[0][1])*(np.corrcoef(np.array(reponseEval)[:,1], np.array(dataPrediction))[0][1]))
+    
+    #j'additione corrcarre à ses anciennes valeurs dans le tableau additionCorrCarre
+    for i in range(len(corrCarre)):
+        additionCorrCarre[i] = additionCorrCarre[i]+corrCarre[i]
+        
+        
+print([n/100 for n in additionCorrCarre])
