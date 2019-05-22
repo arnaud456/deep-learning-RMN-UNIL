@@ -188,6 +188,34 @@ for i in range(100):
     #j'additione corrcarre à ses anciennes valeurs dans le tableau additionCorrCarre
     for i in range(len(corrCarre)):
         additionCorrCarre[i] = additionCorrCarre[i]+corrCarre[i]
+
+        
+additionCorrCarre2 = [0,0,0,0,0,0,0]
+
+for i in range(100):
+    
+    model = keras.Sequential()
+    model.add(keras.layers.Dense(80, activation=tf.nn.relu, input_shape=(1644,)))
+    model.add(keras.layers.Dense(7, activation=tf.nn.relu))
+    
+    model.compile(optimizer='adam', 
+                  loss='mean_squared_error', 
+                  metrics=['mean_squared_error'])
+    
+    history = model.fit(np.array(dataTest),
+                        np.array(reponseTest),
+                        epochs=60, 
+                        batch_size=10,
+                        validation_data=(np.array(dataEval), np.array(reponseEval)),
+                        verbose = 1)
+    
+    corrCarre2 = [np.corrcoef(np.array(reponseEval)[:,0], prediction[:,0])[0][1],np.corrcoef(np.array(reponseEval)[:,1], prediction[:,1])[0][1],np.corrcoef(np.array(reponseEval)[:,2], prediction[:,2])[0][1],np.corrcoef(np.array(reponseEval)[:,3], prediction[:,3])[0][1],np.corrcoef(np.array(reponseEval)[:,4], prediction[:,4])[0][1],np.corrcoef(np.array(reponseEval)[:,5], prediction[:,5])[0][1],np.corrcoef(np.array(reponseEval)[:,6], prediction[:,6])[0][1]]
+    
+    for i in range(len(corrCarre2)):
+        additionCorrCarre2[i] = additionCorrCarre2[i]+corrCarre2[i]
+    
         
         
 print([n/100 for n in additionCorrCarre])
+print([n/100 for n in additionCorrCarre2])
+
