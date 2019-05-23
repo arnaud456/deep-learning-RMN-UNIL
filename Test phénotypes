@@ -146,8 +146,8 @@ model.summary()
 import matplotlib.pyplot as plt
 
 #je calcul corrcarre pour ces valeurs là
+corrCarreAddition = [0,0,0,0,0,0,0]
 for i in range(100):
-    corrCarreAddition = [0,0,0,0,0,0,0]
     for i in range(1):
         corrCarre = []
         for i in range(len(reponseEval[0])):
