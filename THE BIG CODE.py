@@ -145,7 +145,7 @@ from tensorflow import keras
 
 additionCorrCarre = [0,0,0,0,0,0,0]
 
-for i in range(100):
+for i in range(1000):
     
     idTest = random.sample(range(len(dfFinal)), int(len(dfFinal)*0.9))
     
@@ -192,7 +192,7 @@ for i in range(100):
         
 additionCorrCarre2 = [0,0,0,0,0,0,0]
 
-for i in range(100):
+for i in range(1000):
     
     model = keras.Sequential()
     model.add(keras.layers.Dense(80, activation=tf.nn.relu, input_shape=(1644,)))
@@ -215,7 +215,10 @@ for i in range(100):
         additionCorrCarre2[i] = additionCorrCarre2[i]+corrCarre2[i]
     
         
-        
-print([n/100 for n in additionCorrCarre])
-print([n/100 for n in additionCorrCarre2])
+#Donc là le premier print devrait afficher les R^2 dans l'ordre:
+#hdlch, bpd, bps, dmsix, ldlch, trig, dbtldNumber
+#et le deuxième devrait afficher la même chose mais pour un réseau à seule sortie
+ 
+print([n/1000 for n in additionCorrCarre])
+print([n/1000 for n in additionCorrCarre2])
 
