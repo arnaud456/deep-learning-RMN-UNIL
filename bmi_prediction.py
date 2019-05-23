@@ -13,9 +13,9 @@ def transfo(val,mmin,mmax):
 def inv_transfo(val,mmin,mmax):
     return val*(mmax-mmin)+mmin
 
-fname = "../data/colaus1.focus.raw.csv"
-sexfname = "../data/sex.csv"
-phenofname = "../data/metab.tsv"
+fname = "../../data/colaus1.focus.raw.csv"
+sexfname = "../../data/sex.csv"
+phenofname = "../../data/metab.tsv"
 
 mdata = pd.read_csv(fname,sep=",",header=0)
 sdata = pd.read_csv(sexfname,sep=",",header=0)
@@ -29,14 +29,16 @@ ids = mdata.iloc[:,0]
 mdata = mdata.iloc[:,1:]
 
 model = keras.Sequential()
+#model.add(keras.layers.Dropout(0.2))
 model.add(keras.layers.Dense(60, activation=tf.nn.relu,input_shape=(len(mdata.columns)+1,)))
-model.add(keras.layers.Dense(10, activation=tf.nn.relu,input_shape=(len(mdata.columns),)))
+model.add(keras.layers.Dropout(0.2))
+model.add(keras.layers.Dense(10, activation=tf.nn.relu))
 model.add(keras.layers.Dense(1, activation=tf.nn.relu))
-model.summary()
 model.compile(optimizer="adam", loss='mean_squared_error', metrics=['mean_absolute_error'])
+model.summary()
 
 spectrum = data.drop(["0"]+list(pdata.columns),axis=1)
-spectrum = spectrum/spectrum.max().max()
+spectrum = spectrum/spectrum.max(axis=0)
 spectrum = pd.concat([spectrum.reset_index(drop=True),data["sex"]],axis=1)
 train_idx = np.random.choice(range(len(data)),int(len(data)*0.9),replace=False)
 train_data = np.array(spectrum.iloc[train_idx,])

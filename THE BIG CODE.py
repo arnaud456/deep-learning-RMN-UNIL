@@ -11,9 +11,13 @@ Created on Fri May 10 11:44:23 2019
 
 import csv
 
+spectrumfile = "../../data/colaus1.focus.raw.csv"
+phenofile = "../../data/metab.tsv" 
+#csvAge = "../../data/sex.csv"
 #df de phenotypes
 
-with open(#lien vers metab.tsv, 'r') as csvAge:
+
+with open(phenofile, 'r') as csvAge:
     id = []
     age = []
     sex = []
@@ -52,11 +56,12 @@ def normalisator(tableau):
 
 import pandas
 
-dfPhen = pandas.DataFrame({'key': id, 'age': normalisator(age), 'dbtld' : dbtld, 'bpd' : normalisator(bpd),'bps' : normalisator(bps), 'bdmsix' : normalisator(bdmsix), 'hdlch' : normalisator(hdlch), 'ldlch': normalisator(ldlch), 'trig': normalisator(trig)})
+msex = [1  if s=='M' else 0 for s in sex]
+dfPhen = pandas.DataFrame({'key': id, 'age': normalisator(age), 'dbtld' : dbtld, 'bpd' : normalisator(bpd),'bps' : normalisator(bps), 'bdmsix' : normalisator(bdmsix), 'hdlch' : normalisator(hdlch), 'ldlch': normalisator(ldlch), 'trig': normalisator(trig),'sex': msex})
 
 #df de spectres
 
-with open(#lien vers colaus focus raw, "r") as csvFile:
+with open(spectrumfile, "r") as csvFile:
     rowSpectre=[]
     idSpectre=[]
     readerSpectre = csv.reader(csvFile)
@@ -103,7 +108,7 @@ for i in range(1, len(dfFinal)):
 dfTest = dfFinal.iloc[idTest]
 dfEval = dfFinal.iloc[idEval]
 
-print(dfTest['spectre'].iloc[0])
+#print(dfTest['spectre'].iloc[0])
 
 def randomData(dataframe) :
     data = []
@@ -145,7 +150,18 @@ from tensorflow import keras
 
 additionCorrCarre = [0,0,0,0,0,0,0]
 
-for i in range(1000):
+nbessai = 20
+nepoch = 5
+
+model = keras.Sequential()
+model.add(keras.layers.Dense(80, activation=tf.nn.relu, input_shape=(1644,)))
+model.add(keras.layers.Dense(1, activation=tf.nn.relu))
+
+model.compile(optimizer='adam', 
+              loss='mean_squared_error', 
+              metrics=['mean_squared_error'])
+
+for i in range(nbessai):
     
     idTest = random.sample(range(len(dfFinal)), int(len(dfFinal)*0.9))
     
@@ -167,17 +183,11 @@ for i in range(1000):
     #je calcul corrcarre pour ces valeurs là
     corrCarre = []
     for i in range(len(reponseEval[0])):
-        model = keras.Sequential()
-        model.add(keras.layers.Dense(80, activation=tf.nn.relu, input_shape=(1644,)))
-        model.add(keras.layers.Dense(1, activation=tf.nn.relu))
-        
-        model.compile(optimizer='adam', 
-                      loss='mean_squared_error', 
-                      metrics=['mean_squared_error'])
+      
         
         model.fit(np.array(dataTest),
                             np.array(reponseTest)[:,1],
-                            epochs=60)
+                            epochs=nepoch)
         
         prediction = model.predict(np.array(dataEval))
         dataPrediction = []
@@ -190,9 +200,9 @@ for i in range(1000):
         additionCorrCarre[i] = additionCorrCarre[i]+corrCarre[i]
 
         
-additionCorrCarre2 = [0,0,0,0,0,0,0]
+    additionCorrCarre2 = [0,0,0,0,0,0,0]
 
-for i in range(1000):
+
     
     model = keras.Sequential()
     model.add(keras.layers.Dense(80, activation=tf.nn.relu, input_shape=(1644,)))
@@ -201,14 +211,30 @@ for i in range(1000):
     model.compile(optimizer='adam', 
                   loss='mean_squared_error', 
                   metrics=['mean_squared_error'])
+for i in range(nbessai):
+    idTest = random.sample(range(len(dfFinal)), int(len(dfFinal)*0.9))
+    
+    idEval = []
+    for i in range(1, len(dfFinal)):
+        if(i not in idTest):
+            idEval.append(i)
+            
+    dfTest = dfFinal.iloc[idTest]
+    dfEval = dfFinal.iloc[idEval]
+    
+    dataTest = randomData(dfTest)
+    reponseTest = randomReponse(dfTest)
+    
+    dataEval = randomData(dfEval)
+    reponseEval = randomReponse(dfEval)
     
     history = model.fit(np.array(dataTest),
                         np.array(reponseTest),
-                        epochs=60, 
+                        epochs=nepoch, 
                         batch_size=10,
                         validation_data=(np.array(dataEval), np.array(reponseEval)),
                         verbose = 1)
-    
+    prediction = model.predict(np.array(dataEval))
     corrCarre2 = [np.corrcoef(np.array(reponseEval)[:,0], prediction[:,0])[0][1],np.corrcoef(np.array(reponseEval)[:,1], prediction[:,1])[0][1],np.corrcoef(np.array(reponseEval)[:,2], prediction[:,2])[0][1],np.corrcoef(np.array(reponseEval)[:,3], prediction[:,3])[0][1],np.corrcoef(np.array(reponseEval)[:,4], prediction[:,4])[0][1],np.corrcoef(np.array(reponseEval)[:,5], prediction[:,5])[0][1],np.corrcoef(np.array(reponseEval)[:,6], prediction[:,6])[0][1]]
     
     for i in range(len(corrCarre2)):
@@ -219,6 +245,6 @@ for i in range(1000):
 #hdlch, bpd, bps, dmsix, ldlch, trig, dbtldNumber
 #et le deuxième devrait afficher la même chose mais pour un réseau à seule sortie
  
-print([n/1000 for n in additionCorrCarre])
-print([n/1000 for n in additionCorrCarre2])
+print([n/nbessai for n in additionCorrCarre])
+print([n/nbessai for n in additionCorrCarre2])
 

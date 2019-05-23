@@ -13,7 +13,8 @@ import random
 
 rows=[]
 id=[]
-with open("colaus1.focus.raw.csv", "r") as csvFile:
+datadir = "../../data/"
+with open(datadir+"colaus1.focus.raw.csv", "r") as csvFile:
     reader = csv.reader(csvFile)
     for row in reader:
     	r = [float(n) for n in row]
@@ -36,7 +37,7 @@ id = id[1:] # enleve le 0 inutile
 
 s = []
 i = []
-with open("sex.csv", "r") as csvFile:
+with open(datadir+"sex.csv", "r") as csvFile:
     reader2 = csv.reader(csvFile)
     for row in reader2:
     	s.append(row[1])
