@@ -13,7 +13,7 @@ import csv
 
 #df de phenotypes
 
-with open('C:/Users/THEO/Desktop/Biologie-IV/Programmation/data/metab.tsv', 'r') as csvAge:
+with open(#lien vers metab.tsv, 'r') as csvAge:
     id = []
     age = []
     sex = []
@@ -56,7 +56,7 @@ dfPhen = pandas.DataFrame({'key': id, 'age': normalisator(age), 'dbtld' : dbtld,
 
 #df de spectres
 
-with open("C:/Users/THEO/Desktop/Biologie-IV/Programmation/data/colaus1.focus.raw.csv", "r") as csvFile:
+with open(#lien vers colaus focus raw, "r") as csvFile:
     rowSpectre=[]
     idSpectre=[]
     readerSpectre = csv.reader(csvFile)
